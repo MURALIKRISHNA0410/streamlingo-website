@@ -1,4 +1,6 @@
 "use client";
+
+
 import { assets } from "@/utils/asset-utils";
 import { Poppins } from "next/font/google";
 import Image from "next/image";
@@ -7,8 +9,8 @@ import { useState, useEffect } from "react";
 import { cn } from "@/utils/tailwind-utils";
 import animationData from "@/components/voiceAi.json";
 import Lottie from "lottie-react";
-import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
+//import { useMutation } from "convex/react";
+//import { api } from "../../convex/_generated/api";
 import { Instagram, LinkedinIcon } from "lucide-react";
 import {
   Dialog,
@@ -26,8 +28,11 @@ const poppins = Poppins({
   subsets: ["latin"],
 });
 
-export default function Home() {
-  const [docEnv, setDocEnv] = useState(false);
+
+export default function SignUp(){
+
+
+    const [docEnv, setDocEnv] = useState(false);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -43,6 +48,8 @@ export default function Home() {
   const [showBackground, setShowBackground] = useState(false);
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [FirstName, setFirstName] = useState("");
 
   useEffect(() => {
     let currentIndex = 0;
@@ -57,9 +64,8 @@ export default function Home() {
   useEffect(() => {
     setShowBackground(true);
   }, []);
-
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 no-scrollbar">
+    return (
+        <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 no-scrollbar">
       <div
         className={cn(
           "fixed inset-0 transition-colors delay-100 duration-700 opacity-100",
@@ -93,9 +99,7 @@ export default function Home() {
       /> */}
 
       <div className="max-w-3xl mt-10 w-full">
-        <div className="h-full lg:min-h-screen justify-center items-center w-full font-bold p-4 sm:p-8">
-          <Lottie animationData={animationData}  style={{  }} />
-        </div>
+        
         <div className="flex flex-col items-center mt-20 relative z-10">
           <h1
             className={`text-3xl sm:text-5xl md:text-7xl max-w-3xl text-white text-center leading-snug mb-6 sm:mb-8 md:mb-12 ${poppins.className}`}
@@ -117,10 +121,7 @@ export default function Home() {
               StreamLingo
             </span>{" "}
           </h1>
-          <p className="text-gray-300 mb-4 sm:mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl text-center">
-            Experience seamless communication, real-time translations, and
-            powerful AI tools.
-          </p>
+          
           {/* <p className="text-gray-300 mb-4 sm:mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl text-center">
             StreamLingo VoiceSync transforms your online meetings with advanced
             features like real-time language translations, interactive
@@ -140,6 +141,28 @@ export default function Home() {
               }}
               className="flex flex-col items-center w-full sm:flex-row sm:justify-center"
             >
+                <div className="grid gap-6 mb-6 md:grid-cols-1">
+                <input
+                className={cn(
+                  "text-gray-500 text-lg sm:text-xl md:text-2xl bg-gray-900 flex-1 py-2.5 outline-none border bg-opacity-20 shadow-md placeholder:text-neutral-500 pl-5 rounded-lg mb-4 sm:mb-0 sm:mr-2",
+                  {
+                    "border-purple-300": currentFramework === "qwik",
+                    "border-sky-300": currentFramework === "safari",
+                    "border-yellow-300": currentFramework === "chrome",
+                    "border-teal-300": currentFramework === "tailwind",
+                    "border-blue-300": currentFramework === "react",
+                    "border-green-300": currentFramework === "vue",
+                    "border-orange-400": currentFramework === "svelte",
+                    "border-red-300": currentFramework === "mobile",
+                    "border-neutral-300": currentFramework === "desktop",
+                  },
+                )}
+                value={FirstName}
+                placeholder="Enter your First Name"
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                }}
+              />
               <input
                 className={cn(
                   "text-gray-500 text-lg sm:text-xl md:text-2xl bg-gray-900 flex-1 py-2.5 outline-none border bg-opacity-20 shadow-md placeholder:text-neutral-500 pl-5 rounded-lg mb-4 sm:mb-0 sm:mr-2",
@@ -161,6 +184,61 @@ export default function Home() {
                   setEmail(e.target.value);
                 }}
               />
+              <input
+                className={cn(
+                  "text-gray-500 text-lg sm:text-xl md:text-2xl bg-gray-900 flex-1 py-2.5 outline-none border bg-opacity-20 shadow-md placeholder:text-neutral-500 pl-5 rounded-lg mb-4 sm:mb-0 sm:mr-2",
+                  {
+                    "border-purple-300": currentFramework === "qwik",
+                    "border-sky-300": currentFramework === "safari",
+                    "border-yellow-300": currentFramework === "chrome",
+                    "border-teal-300": currentFramework === "tailwind",
+                    "border-blue-300": currentFramework === "react",
+                    "border-green-300": currentFramework === "vue",
+                    "border-orange-400": currentFramework === "svelte",
+                    "border-red-300": currentFramework === "mobile",
+                    "border-neutral-300": currentFramework === "desktop",
+                  },
+                )}
+                value={password}
+                placeholder="Enter your Password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+              />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "text-black text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-md font-semibold transition-colors duration-200",
+                      {
+                        "bg-purple-300": currentFramework === "qwik",
+                        "bg-sky-300": currentFramework === "safari",
+                        "bg-yellow-300": currentFramework === "chrome",
+                        "bg-teal-300": currentFramework === "tailwind",
+                        "bg-blue-300": currentFramework === "react",
+                        "bg-green-300": currentFramework === "vue",
+                        "bg-orange-400": currentFramework === "svelte",
+                        "bg-red-300": currentFramework === "mobile",
+                        "bg-neutral-300": currentFramework === "desktop",
+                      },
+                    )}
+                  >
+                    Record Audio
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 text-gray-300 max-w-lg mx-auto p-6 rounded-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-300 mb-4 text-center font-bold text-2xl">
+                      Please speak for atleast 25 seconds 
+                    </DialogTitle>
+                    <DialogDescription className="px-4 text-center text-lg">
+                      Your Audio is taken for the voice mimicry so that while streaming your audio in the meeting your original audio in the different language will be streamed  .
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+              
               <Dialog>
                 <DialogTrigger asChild>
                   <button
@@ -180,52 +258,30 @@ export default function Home() {
                       },
                     )}
                   >
-                    Join waitlist
+                    SignUp
                   </button>
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 text-gray-300 max-w-lg mx-auto p-6 rounded-lg">
                   <DialogHeader>
                     <DialogTitle className="text-gray-300 mb-4 text-center font-bold text-2xl">
-                      Thank you for joining the waitlist!
+                      Thank you for Signing IN 
                     </DialogTitle>
                     <DialogDescription className="px-4 text-center text-lg">
-                      {"We're"} thrilled to have you on board. Keep an eye on
-                      your inbox for exclusive updates, sneak peeks, and early
-                      access to our groundbreaking platform.
+                     Please Login to the website for a wonderfull voice mimicry video stremaing meet application.
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>
               </Dialog>
+              </div>
             </form>
           </div>
           {/* <div className="h-full justify-center items-center w-full font-bold p-4 sm:p-8">
           <Lottie animationData={animationData}  style={{  }} />
         </div> */}
-          <div className="items-center justify-center text-center">
-            <p className="text-center text-gray-200 text-xl sm:text-2xl md:text-3xl font-bold mb-4 mt-8">
-              Follow us to stay updated
-            </p>
-            <div className="mb-4 sm:mb-6 md:mb-8 flex items-center text-center justify-center text-gray-400 gap-5">
-              <Link href="https://www.instagram.com/oscowl_/?hl=en">
-                <Instagram className="text-3xl hover:text-pink-600" size={30} />
-              </Link>
-              <Link href="https://in.linkedin.com/company/oscowl">
-                <LinkedinIcon
-                  className="text-3xl hover:text-blue-500"
-                  size={30}
-                />
-              </Link>
-              <Link href="https://twitter.com/oscowl_">
-                <FaXTwitter className="text-3xl hover:text-white" size={30} />
-              </Link>
-            </div>
-          </div>
-          <div className="bottom-0 w-full text-gray-500 text-center text-lg sm:text-xl md:text-2xl mb-4 p-5">
-            © 2024 <Link href="https://www.oscowl.in/">OSCOWL™</Link>. All
-            Rights Reserved.
-          </div>
+          
+          
         </div>
       </div>
     </main>
-  );
+    )
 }
