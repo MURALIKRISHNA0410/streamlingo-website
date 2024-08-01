@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { FaXTwitter } from "react-icons/fa6";
 
+
 const poppins = Poppins({
   weight: "700",
   subsets: ["latin"],
@@ -59,7 +60,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 no-scrollbar">
+    <main className="flex flex-col items-center justify-center p-4 md:p-8 no-scrollbar">
+      
       <div
         className={cn(
           "fixed inset-0 transition-colors delay-100 duration-700 opacity-100",
@@ -92,15 +94,15 @@ export default function Home() {
         }}
       /> */}
 
-      <div className="max-w-3xl mt-10 w-full">
-        <div className="h-full lg:min-h-screen justify-center items-center w-full font-bold p-4 sm:p-8">
+      <div className="max-w-3xl  w-full">
+        {/*<div className="h-full lg:min-h-screen justify-center items-center w-full font-bold p-4 sm:p-8">
           <Lottie animationData={animationData}  style={{  }} />
-        </div>
-        <div className="flex flex-col items-center mt-20 relative z-10">
+        </div>*/}
+        <div className="flex flex-col items-center relative z-10">
           <h1
             className={`text-3xl sm:text-5xl md:text-7xl max-w-3xl text-white text-center leading-snug mb-6 sm:mb-8 md:mb-12 ${poppins.className}`}
           >
-            Revolutionize Your Meetings with{" "}
+            {/*Revolutionize Your Meetings with{" "}*/}
             <span
               className={cn("transition-colors duration-200", {
                 "text-purple-300": currentFramework === "qwik",
@@ -121,13 +123,13 @@ export default function Home() {
             Experience seamless communication, real-time translations, and
             powerful AI tools.
           </p>
-          {/* <p className="text-gray-300 mb-4 sm:mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl text-center">
+          {/*<p className="text-gray-300 mb-4 sm:mb-6 md:mb-8 text-lg sm:text-xl md:text-2xl text-center">
             StreamLingo VoiceSync transforms your online meetings with advanced
             features like real-time language translations, interactive
             AI-powered tools, attendance tracking, and superior voice clarity.
-            Join our waitlist to be the first to experience the future of
+            Join us fast to be the first to experience the future of
             business communication.
-          </p> */}
+          </p>*/}
           {/* <div className="h-full justify-center items-center w-full font-bold p-4 sm:p-8">
           <Lottie animationData={animationData}  style={{  }} />
         </div> */}
@@ -138,9 +140,47 @@ export default function Home() {
                 //createWaitlist({ email });
                 e.preventDefault();
               }}
-              className="flex flex-col items-center w-full sm:flex-row sm:justify-center"
+              className="flex flex-col items-center w-full sm:flex-row sm:justify-center space-x-6"
             >
-              <input
+        
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Link href="/Login">
+                  <button
+                    type="button"
+                    className={cn(
+                      "text-black text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full font-semibold transition-colors duration-200 hover:bg-blue-700",
+                      {
+                        "bg-purple-300": currentFramework === "qwik",
+                        "bg-sky-300": currentFramework === "safari",
+                        "bg-yellow-300": currentFramework === "chrome",
+                        "bg-teal-300": currentFramework === "tailwind",
+                        "bg-blue-300": currentFramework === "react",
+                        "bg-green-300": currentFramework === "vue",
+                        "bg-orange-400": currentFramework === "svelte",
+                        "bg-red-300": currentFramework === "mobile",
+                        "bg-neutral-300": currentFramework === "desktop",
+                      },
+                    )}
+                  >
+                    Login
+                  </button>
+                  </Link>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 text-gray-300 max-w-lg mx-auto p-6 rounded-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-300 mb-4 text-center font-bold text-2xl">
+                      Thank you for Loggin In
+                    </DialogTitle>
+                    <DialogDescription className="px-4 text-center text-lg">
+                      {"We're"} thrilled to have you on board. Keep an eye on
+                      your inbox for exclusive updates, sneak peeks, and early
+                      access to our groundbreaking platform.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+              {/*{<input
                 className={cn(
                   "text-gray-500 text-lg sm:text-xl md:text-2xl bg-gray-900 flex-1 py-2.5 outline-none border bg-opacity-20 shadow-md placeholder:text-neutral-500 pl-5 rounded-lg mb-4 sm:mb-0 sm:mr-2",
                   {
@@ -160,13 +200,14 @@ export default function Home() {
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
-              />
+              />*/}
               <Dialog>
                 <DialogTrigger asChild>
+                  <Link href="/SignUp">
                   <button
                     type="submit"
                     className={cn(
-                      "text-black text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-md font-semibold transition-colors duration-200",
+                      "text-black text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full font-semibold transition-colors duration-200 hover:bg-blue-900",
                       {
                         "bg-purple-300": currentFramework === "qwik",
                         "bg-sky-300": currentFramework === "safari",
@@ -180,13 +221,14 @@ export default function Home() {
                       },
                     )}
                   >
-                    Join waitlist
+                    Sign Up
                   </button>
+                  </Link>
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 text-gray-300 max-w-lg mx-auto p-6 rounded-lg">
                   <DialogHeader>
                     <DialogTitle className="text-gray-300 mb-4 text-center font-bold text-2xl">
-                      Thank you for joining the waitlist!
+                      Thank you for Signing In
                     </DialogTitle>
                     <DialogDescription className="px-4 text-center text-lg">
                       {"We're"} thrilled to have you on board. Keep an eye on
@@ -196,6 +238,7 @@ export default function Home() {
                   </DialogHeader>
                 </DialogContent>
               </Dialog>
+              
             </form>
           </div>
           {/* <div className="h-full justify-center items-center w-full font-bold p-4 sm:p-8">
