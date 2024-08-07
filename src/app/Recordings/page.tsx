@@ -35,6 +35,7 @@ const RecordingPage: React.FC = () => {
     }
 
     try {
+      console.log("started Recording")
       const mediaRecorder = new MediaRecorder(stream!);
       const chunks: BlobPart[] = [];
       let timeLeft = 5;
@@ -51,12 +52,14 @@ const RecordingPage: React.FC = () => {
       mediaRecorder.ondataavailable = (e: BlobEvent) => chunks.push(e.data);
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/wav' });
+        console.log(blob);
         setRecordings(prev => new Map(prev.set(index, blob)));
         setRecordingStatus(prev => new Map(prev.set(index, 0))); // Reset the countdown
       };
 
       mediaRecorder.start();
       setTimeout(() => mediaRecorder.stop(), 5000); // Stop recording after 5 seconds
+
     } catch (error) {
       console.error('Error accessing audio devices.', error);
     }
@@ -79,7 +82,7 @@ const RecordingPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
+    /*<div className="p-4">
       {!permissionGranted && (
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
@@ -132,6 +135,69 @@ const RecordingPage: React.FC = () => {
       >
         Stop Using Microphone and Go to Home
       </button>
+    </div>*/
+    <div className="p-6 min-h-screen bg-gray-900 text-white shadow-lg rounded-lg">
+      <div className="max-w-full mx-auto">
+        {!permissionGranted && (
+          <button
+            className="bg-gray-500 text-gray-900 px-6 py-4 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
+            onClick={requestPermission}
+          >
+            Grant Microphone Access
+          </button>
+        )}
+        <div className="overflow-x-auto mt-6">
+          <table className="w-full bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-700 text-gray-300">
+                <th className="border p-4 text-left">Sentence</th>
+                <th className="border p-4 text-center">Record</th>
+                <th className="border p-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sentences.map((sentence, index) => (
+                <tr
+                  key={index}
+                  className={`transition-colors duration-300 ${
+                    !recordings.has(index) ? 'bg-gray-800 text-white' : 'bg-green-800'
+                  }`}
+                >
+                  <td className="border p-4">{sentence}</td>
+                  <td className="border p-4 text-center">
+                    <button
+                      className="bg-gray-500 text-gray-900 px-6 py-3 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
+                      onClick={() => startRecording(index)}
+                      disabled={recordingStatus.get(index) !== undefined && recordingStatus.get(index)! > 0}
+                    >
+                      Record
+                    </button>
+                  </td>
+                  <td className="border p-4">
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-600 rounded mr-2 overflow-hidden" style={{ height: '30px' }}>
+                        <div
+                          className="bg-gradient-to-r from-gray-800 to-yellow-500 text-xl leading-none py-1 text-center text-white rounded"
+                          style={{ width: `${Math.min((recordingStatus.get(index) ?? 0) / 5 * 100, 100)}%` }} // 5 seconds max
+                        >
+                          {recordingStatus.get(index) ?? 5}
+                        </div>
+                      </div>
+                      <span className="text-gray-400">{recordingStatus.get(index) ?? 5}s</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button
+          className="bg-gray-600 text-white px-6 py-4 rounded-lg shadow-md items-center hover:bg-green-400 transition duration-300 mt-6"
+          onClick={handleStopButtonClick}
+        >
+          Stop Using Microphone and Go to Home
+        </button>
+      </div>
     </div>
   );
 };
