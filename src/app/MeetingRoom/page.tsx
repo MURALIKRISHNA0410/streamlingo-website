@@ -11,12 +11,12 @@ const MeetingRoom = () => {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('English');
-  const [socket, setSocket] = useState<any>(null);
+  //const [socket, setSocket] = useState<any>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  /*useEffect(() => {
     // Initialize socket.io connection
     const socket = io('http://127.0.0.1:8000/sampleRoute',{
         transports: ['websocket'], 
@@ -128,7 +128,18 @@ const MeetingRoom = () => {
         peerConnection.close();
       }
     };
-  }, [selectedLanguage]);
+  }, [selectedLanguage]);*/
+
+  const socket = new WebSocket("ws://localhost:8000/ws");
+
+socket.onopen = function(event) {
+    socket.send("Hello, WebSocket Server!");  // Sending a message to the server
+};
+
+socket.onmessage = function(event) {
+    console.log("Message from server: ", event.data);  // Receiving a message from the server
+};
+
 
   return (
     <div className="meeting-room">
