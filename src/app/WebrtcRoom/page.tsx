@@ -12,85 +12,68 @@ export default function WebrtcRoom() {
 
   const servers = {
     iceServers: [
-      {
-        urls: "stun:stun.l.google.com:19302",
-      },
+      { urls: "stun:stun.l.google.com:19302" },
     ],
   };
 
+  const handleStop=async()=>{
+    const socket = new WebSocket("ws://localhost:8000/meetws");
+    setSocket(socket);
+    socket.onopen=()=>{
+      socket.send("isTranslateOn_false")
+    }
+  }
   const handleStart = async () => {
-    // Get local media stream (audio + video)
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
 
-    // Set the local video stream
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
     }
 
-    // Open WebSocket connection for signaling
     const socket = new WebSocket("ws://localhost:8000/meetws");
     setSocket(socket);
+    socket.onopen=()=>{
+      socket.send("isTranslateOn_true")
+    }
+    
 
-    // Open WebSocket connection for audio processing
     const audioSocket = new WebSocket("ws://localhost:8000/process_audio");
     setAudioSocket(audioSocket);
+    
 
     audioSocket.onopen = () => {
-      const audioContext = new AudioContext();
       const mediaRecorder = new MediaRecorder(localStream);
 
-      mediaRecorder.ondataavailable = async (event) => {
+      mediaRecorder.ondataavailable = (event) => {
         const audioData = event.data;
         audioSocket.send(audioData);
       };
 
-      mediaRecorder.start(1000); // Send audio data every second
+      mediaRecorder.start(3000); // Send audio data every 3 seconds
 
-      audioSocket.onmessage = async (event) => {
-        const processedAudioData = event.data;
-
-        // Create an audio element to play the processed audio
-        const audioBlob = new Blob([processedAudioData], { type: "audio/wav" });
+      audioSocket.onmessage = (event) => {
+        const audioBlob = new Blob([event.data], { type: "audio/mp3" });
         const audioUrl = URL.createObjectURL(audioBlob);
 
         const audio = new Audio(audioUrl);
-        const source = audioContext.createMediaElementSource(audio);
-        const destination = audioContext.createMediaStreamDestination();
-
-        // Connect the processed audio to the destination
-        source.connect(destination);
-
-        // Send the processed audio stream to the peer connection
-        destination.stream.getTracks().forEach((track) => {
-          peerConnection?.addTrack(track, destination.stream);
-        });
-
         audio.play();
       };
     };
 
-    audioSocket.onerror = (error) => {
-      console.error("Audio WebSocket error:", error);
-    };
-
-    audioSocket.onclose = (event) => {
-      console.log("Audio WebSocket connection closed:", event);
-    };
+    audioSocket.onerror = (error) => console.error("Audio WebSocket error:", error);
+    audioSocket.onclose = (event) => console.log("Audio WebSocket connection closed:", event);
 
     socket.onopen = async () => {
       console.log("WebSocket connection opened.");
 
-      // Initialize the WebRTC connection
       const peerConnection = new RTCPeerConnection(servers);
       setPeerConnection(peerConnection);
 
-      // Add local stream tracks to the WebRTC connection
       localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
 
-      // Handle remote stream
       peerConnection.ontrack = (event) => {
         const [remoteStream] = event.streams;
         if (remoteVideoRef.current) {
@@ -98,14 +81,12 @@ export default function WebrtcRoom() {
         }
       };
 
-      // Handle ICE candidates
       peerConnection.onicecandidate = (event) => {
         if (event.candidate && socket.readyState === WebSocket.OPEN) {
           socket.send(JSON.stringify({ type: "candidate", candidate: event.candidate }));
         }
       };
 
-      // Handle signaling messages from WebSocket
       socket.onmessage = async (event) => {
         const message = JSON.parse(event.data);
 
@@ -123,19 +104,13 @@ export default function WebrtcRoom() {
         }
       };
 
-      // Create an offer if this is the initiating peer
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       socket.send(JSON.stringify({ type: "offer", offer }));
     };
 
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    socket.onclose = (event) => {
-      console.log("WebSocket connection closed:", event);
-    };
+    socket.onerror = (error) => console.error("WebSocket error:", error);
+    socket.onclose = (event) => console.log("WebSocket connection closed:", event);
   };
 
   const sendMessage = () => {
@@ -153,6 +128,7 @@ export default function WebrtcRoom() {
       <video ref={remoteVideoRef} autoPlay playsInline style={{ width: "300px" }} />
       <br />
       <button onClick={handleStart}>Start</button>
+      <button onClick={handleStop}>Stop</button>
 
       <div style={{ marginTop: "20px" }}>
         <h2>Chat</h2>

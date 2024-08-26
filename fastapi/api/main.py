@@ -82,6 +82,7 @@ from typing import List
 
 import io
 import time
+from fastapi.responses import StreamingResponse
 import pygame
 from gtts import gTTS
 from fastapi import FastAPI, UploadFile, File
@@ -91,7 +92,7 @@ from googletrans import LANGUAGES, Translator
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from typing import List
-
+isTranslateOn=False
 app = FastAPI()
 
 clients: List[WebSocket] = []
@@ -104,6 +105,12 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             try:
                 data = await websocket.receive_text()
+                if(data=="isTranslateOn_true"):
+                    isTranslateOn=True
+                elif(data=="isTranslateOn_false"):
+                    isTranslateOn=False
+
+
                 for client in clients:
                     if client != websocket:
                         await client.send_text(data)
@@ -125,11 +132,34 @@ async def websocket_endpoint(websocket: WebSocket):
 async def process_audio_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
+        print("hii")
         while True:
+
             audio_data = await websocket.receive_bytes()
-            # processed_audio = process_audio_with_ml(audio_data)
+            print("hii")
+            print(type(audio_data))
+            
+            #processed_audio = main_process(audio_data)
+            rec = sr.Recognizer()
+            audio = sr.AudioData(audio_data, sample_rate=16000, sample_width=2) 
+            spoken_text = rec.recognize_google(audio, language="en")
+            translated_text = translator_function(spoken_text,"fr", "en")
+            myobj = gTTS(text=translated_text.text, lang="en", slow=False)
+            audio_stream = io.BytesIO()
+            myobj.write_to_fp(audio_stream)
+            audio_stream.seek(0)
+            pygame.mixer.music.load(audio_data, 'mp3')
+            pygame.mixer.music.play()
+
+    # Wait until the sound is finished playing
+            while pygame.mixer.music.get_busy():
+                time.sleep(0.1)
             # await websocket.send_bytes(processed_audio)
-            await websocket.send_bytes(audio_data)
+            print(type(audio_stream))
+            #if not isinstance(processed_audio, bytes):
+                #processed_audio = processed_audio.encode('utf-8')  # Or other relevant encoding
+            await websocket.send_bytes(audio_stream)
+            
     except WebSocketDisconnect:
         print("Audio processing client disconnected")
     finally:
@@ -150,6 +180,47 @@ async def process_audio_endpoint(websocket: WebSocket):
 translator = Translator()
 language_mapping = {name: code for code, name in LANGUAGES.items()}
 pygame.mixer.init()
+
+def translator_function(spoken_text, tel, eng):
+    return translator.translate(spoken_text, src="fr", dest="en")
+
+def text_to_voice(text_data, eng):
+    myobj = gTTS(text=text_data, lang="en", slow=False)
+    audio_stream = io.BytesIO()
+    myobj.write_to_fp(audio_stream)
+    audio_stream.seek(0)  # Rewind the stream to the beginning
+    print("In text to speech")
+    return StreamingResponse(audio_stream, media_type="audio/wav")
+
+
+def main_process(audio_data: bytes)-> bytes:
+   
+
+    while isTranslateOn:
+        rec = sr.Recognizer()
+        
+
+        try:
+            print("Processing...")
+            spoken_text = rec.recognize_google(audio_data, language="en")
+
+            print("Translating...")
+            translated_text = translator_function(spoken_text,"fr", "en")
+
+            print("Text to Speech...")
+            text_to_voice(translated_text.text, "fr")
+
+
+
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+        except Exception as e:
+            print(e)
+            print(f"Error: {e}")
+
+
 def process_audio_with_ml(audio_data: bytes) -> bytes:
 
     # Convert byte data to a NumPy array or another format your ML model expects
@@ -157,31 +228,9 @@ def process_audio_with_ml(audio_data: bytes) -> bytes:
     
     # Process with your ML model
     #processed_audio_array = some_ml_framework.process(audio_array)
+    return 
     
-    translator = Translator()
-    pygame.mixer.init()
-    
-    
-def get_language_code(language_name):
-    return language_mapping.get(language_name, language_name)
 
-def translator_function(spoken_text, from_language, to_language):
-    return translator.translate(spoken_text, src=from_language, dest=to_language)
-
-def text_to_voice(text_data, to_language):
-    myobj = gTTS(text=text_data, lang=to_language, slow=False)
-
-def text_to_voice(text_data, to_language):
-    myobj = gTTS(text=text_data, lang=to_language, slow=False)
-    
-    # Save to a BytesIO object
-    audio_data = io.BytesIO()
-    myobj.write_to_fp(audio_data)
-    audio_data.seek(0)
-    pygame.mixer.music.load(audio_data, 'mp3')
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        time.sleep(0.1)
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
