@@ -1,45 +1,85 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Audio</title>
+    <title>Audio Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { text-align: center; margin-top: 50px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+        input[type="file"] { margin: 10px; }
+    </style>
 </head>
 <body>
-    <button id="start">Start Recording</button>
-    <button id="stop" disabled>Stop Recording</button>
+    <div class="container">
+        <h1>Audio Uploader</h1>
+        <input type="file" id="audioFileInput" accept="audio/wav">
+        <button id="uploadButton">Upload and Process Audio</button>
+        <button id="fetchAudioButton">Fetch Processed Audio</button>
+        <audio id="audioPlayback" controls></audio>
+    </div>
 
     <script>
-        const startButton = document.getElementById('start');
-        const stopButton = document.getElementById('stop');
-        let mediaRecorder;
-        let socket;
+        const uploadButton = document.getElementById('uploadButton');
+        const fetchAudioButton = document.getElementById('fetchAudioButton');
+        const audioPlayback = document.getElementById('audioPlayback');
+        const audioFileInput = document.getElementById('audioFileInput');
 
-        startButton.addEventListener('click', async () => {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            socket = new WebSocket("ws://localhost:8000/ws");
+        async function uploadAudio() {
+            const file = audioFileInput.files[0];
+            if (!file) {
+                alert("Please select an audio file first.");
+                return;
+            }
 
-            socket.onopen = () => {
-                mediaRecorder = new MediaRecorder(stream);
-                console.log("hi")
-                mediaRecorder.ondataavailable = (event) => {
-                    console.log("hi")
-                    if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
-                        socket.send(event.data);  // Send audio data as binary blob
-                        console.log("data sent:",event.data)
-                    }
-                };
-                mediaRecorder.start(250);  // Send data in chunks every 250ms
-                startButton.disabled = false;
-                stopButton.disabled = true;
-            };
-        });
+            // Check if the file is in WAV format
+            if (file.type !== 'audio/wav') {
+                alert("Please select a WAV file.");
+                return;
+            }
 
-        /*stopButton.addEventListener('click', () => {
-            mediaRecorder.stop();
-            socket.close();
-            startButton.disabled = false;
-            stopButton.disabled = true;
-        });*/
+            const formData = new FormData();
+            formData.append('file', file);
+       
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/translate/', {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                });
+
+                if (response.ok) {
+                    alert('Audio file uploaded and processed successfully.');
+                } else {
+                    alert('Failed to upload and process audio.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the audio.');
+            }
+        }
+
+        async function fetchProcessedAudio() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/processed-audio');
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayback.src = audioUrl;
+                    audioPlayback.play();
+                } else {
+                    alert('Failed to fetch processed audio.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while fetching the processed audio.');
+            }
+        }
+
+        uploadButton.addEventListener('click', uploadAudio);
+        fetchAudioButton.addEventListener('click', fetchProcessedAudio);
     </script>
 </body>
 </html>
